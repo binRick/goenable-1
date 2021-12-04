@@ -40,7 +40,9 @@ clean:
 .PHONY: module
 module: out
 	[[ -d "${SRC_DIR}" ]] || mkdir -p "${SRC_DIR}"
-	command jinja -D MODULE ${MODULE} ${TEMPLATES_DIR}/bash_structs.go.j2 -o ${SRC_DIR}/bash_structs.go
-	command jinja -D MODULE ${MODULE} ${TEMPLATES_DIR}/bash.go.j2 -o ${SRC_DIR}/bash.go
-	command jinja -D MODULE ${MODULE} ${TEMPLATES_DIR}/hooks.go.j2 -o ${SRC_DIR}/hooks.go
+	rsync ${TEMPLATES_DIR}/*.j2 ${TMP_DIR}/.
+	replace '[[MODULE]]' '{{MODULE}}' -- ${TMP_DIR}/*.j2
+	command jinja -D MODULE ${MODULE} ${TMP_DIR}/bash_structs.go.j2 -o ${SRC_DIR}/bash_structs.go
+	command jinja -D MODULE ${MODULE} ${TMP_DIR}/bash.go.j2 -o ${SRC_DIR}/bash.go
+	command jinja -D MODULE ${MODULE} ${TMP_DIR}/hooks.go.j2 -o ${SRC_DIR}/hooks.go
 	env CGO_ENABLED=${CGO_ENABLED} go build -o out/${MODULE}.so -buildmode=c-shared ${SRC_DIR}/.
