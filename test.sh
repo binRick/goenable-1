@@ -1,12 +1,13 @@
 #!/bin/bash
 set -e
 cd $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+[[ -f ./.envrc ]] && source ./.envrc
 
 if ! command -v ansi >/dev/null; then
 	alias ansi=$(pwd)/ansi
 fi
 HR="$(ansi --black --bg-white "##############################################################################")"
-MODULE="goenable"
+MODULE="${MODULE:-goenable2}"
 OPTIONS="test1 test2"
 MODES="load run"
 ef=/tmp/$MODULE.err
@@ -23,26 +24,26 @@ coproc cperr {
 	while :; do
 		read -r input
 		ansi >&2 --red --bg-black --bold "|ERR>  ${input}"
-	done 2>$ef
+	done
+# 2>$ef
 }
 
 trap killcps EXIT
 
 do_test() {
 	cmd="$(cat <<CAT_EOF
-#!/usr/bin/env bash
 echo Bash \$BASH_VERSION
 set +e
 make --quiet >/dev/null && env bash --norc --noprofile -i << EOF
 source ~/bash-it/themes/powerline/powerline.*bash
-  for opt in \$OPTIONS; do
-   enable -f ./out/${MODULE}.so $MODULE
-    for MODE in \$MODES; do
-      $MODULE $MODE \$opt
-    done
-    enable -d $MODULE
-    sleep .2
+for opt in $OPTIONS; do
+  enable -f ./out/${MODULE}.so $MODULE
+  for MODE in $MODES; do
+    $MODULE $MODE \$opt
   done
+  enable -d $MODULE
+done
+sleep .5
 EOF
 CAT_EOF
 )"

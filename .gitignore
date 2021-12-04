@@ -228,3 +228,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/c,go,vim,macos,windows,jetbrains+all
+.envrc*

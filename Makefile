@@ -3,9 +3,8 @@ CGO_ENABLED := 1
 export
 TARGETS := darwin/amd64,linux/amd64
 GO_VERSION := 1.17.2
-BASH_VERSION := 5.0
+BASH_VERSION := 5.1.8
 SHELL := /usr/bin/env bash
-MODULE := goenable
 TEMPLATES_DIR := ./templates
 SRC_DIR := ./
 
@@ -44,4 +43,4 @@ module: out
 	command jinja -D MODULE ${MODULE} ${TEMPLATES_DIR}/bash_structs.go.j2 -o ${SRC_DIR}/bash_structs.go
 	command jinja -D MODULE ${MODULE} ${TEMPLATES_DIR}/bash.go.j2 -o ${SRC_DIR}/bash.go
 	command jinja -D MODULE ${MODULE} ${TEMPLATES_DIR}/hooks.go.j2 -o ${SRC_DIR}/hooks.go
-	go build -o out/${MODULE}.so -buildmode=c-shared ${SRC_DIR}/.
+	env CGO_ENABLED=${CGO_ENABLED} go build -o out/${MODULE}.so -buildmode=c-shared ${SRC_DIR}/.

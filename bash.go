@@ -3,7 +3,7 @@ package main
 /*
 #cgo pkg-config: bash
 #include "builtins.h"
-extern struct builtin goenable_struct;
+extern struct builtin goenable5_struct;
 */
 import "C"
 
@@ -17,14 +17,14 @@ import (
 )
 
 func init() {
-	C.goenable_struct.name = C.CString(Name())
+	C.goenable5_struct.name = C.CString(Name())
 	longDoc := strings.Split(Usage(), "\n")
-	C.goenable_struct.long_doc = (**C.char)(cutils.CStringArray(longDoc))
-	C.goenable_struct.short_doc = C.CString(UsageShort())
+	C.goenable5_struct.long_doc = (**C.char)(cutils.CStringArray(longDoc))
+	C.goenable5_struct.short_doc = C.CString(UsageShort())
 }
 
-//export goenable_builtin
-func goenable_builtin(list *C.WORD_LIST) C.int {
+//export goenable5_builtin
+func goenable5_builtin(list *C.WORD_LIST) C.int {
 	args := make([]string, 0)
 	Args := []string{}
 	MODE := ``
@@ -46,8 +46,8 @@ func goenable_builtin(list *C.WORD_LIST) C.int {
 	return result
 }
 
-//export goenable_builtin_load
-func goenable_builtin_load(cName *C.char) C.int {
+//export goenable5_builtin_load
+func goenable5_builtin_load(cName *C.char) C.int {
 	name := C.GoString(cName)
 	fmt.Fprintf(os.Stdout, "Builtin Loading>  name: \"%s\"\n", name)
 	//if Load(name) {
@@ -60,8 +60,8 @@ func goenable_builtin_load(cName *C.char) C.int {
 	return 1
 }
 
-//export goenable_builtin_unload
-func goenable_builtin_unload() {
+//export goenable5_builtin_unload
+func goenable5_builtin_unload() {
 	fmt.Println(`unloading.........`)
 	Unload()
 	fmt.Println(`unloaded.........`)
