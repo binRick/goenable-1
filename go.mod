@@ -9,6 +9,7 @@ require (
 
 require (
 	github.com/k0kubun/pp v3.0.1+incompatible // indirect
+	github.com/karalabe/xgo v0.0.0-20191115072854-c5ccff8648a7 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/kr/pty v1.1.1 // indirect
 	github.com/kr/text v0.1.0 // indirect
