@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e
 cd $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 [[ -f ./.envrc ]] && source ./.envrc
@@ -10,6 +10,8 @@ OPTIONS="test1 test2"
 MODES="load run"
 ef=/.$MODULE-test.err
 of=/.$MODULE-test.out
+TEST_BASH=/usr/bin/bash
+TEST_BASH=/opt/bash-5.1/bin/bash
 
 coproc cpout {
 	while :; do
@@ -22,28 +24,27 @@ coproc cperr {
 	while :; do
 		read -r input
 		ansi >&2 --red --bg-black --bold "|ERR>  ${input}"
-	done 2>$ef
+	done
+	# 2>$ef
 }
 
 trap killcps EXIT
 
 do_test() {
-	cmd="$(cat <<CAT_EOF
+	cmd="$(
+		cat <<CAT_EOF
+#!${TEST_BASH}
 echo Bash \$BASH_VERSION
 set +e
 make --quiet >/dev/null && env bash --norc --noprofile -i << EOF
 #source ~/bash-it/themes/powerline/powerline.*bash
-enable -f ./out/${MODULE}.so $MODULE
- for opt in $OPTIONS; do
-  for MODE in $MODES; do
-    eval $MODULE $MODE \$opt
-  done
- done
+ enable -f ./out/${MODULE}.so $MODULE
+ $MODULE load arg1
  enable -d $MODULE
-sleep .5
+sleep .9
 EOF
 CAT_EOF
-)"
+	)"
 
 	echo -e "$HR"
 	while read -r l; do
@@ -53,7 +54,10 @@ CAT_EOF
 
 	{
 		set +e
-		eval "$cmd" 2>&"${cperr[1]}" >&"${cpout[1]}"
+		cf=$(mktemp)
+		echo -e "$cmd" >$cf
+		chmod +x $cf
+		eval $cf 2>&"${cperr[1]}" >&"${cpout[1]}"
 		ec=$?
 		if [[ "$ec" != 0 ]]; then
 			ansi --red "$cmd - Test Failed - Exited $ec"
@@ -68,7 +72,10 @@ CAT_EOF
 killcps() {
 	set +e
 	while [[ "$(jobs -p)" != "" ]]; do
-		jobs -p >/dev/null && { echo -n "Killing Jobs: "; ansi --bg-black --magenta --bold "$(jobs -p | tr '\n' ' ')"; }
+		jobs -p >/dev/null && {
+			echo -n "Killing Jobs: "
+			ansi --bg-black --magenta --bold "$(jobs -p | tr '\n' ' ')"
+		}
 		echo
 		{
 			kill %1
@@ -82,7 +89,7 @@ killcps() {
 		jobs -p
 		sleep .5
 	done
-  sleep .1
+	sleep .1
 }
 
 do_test

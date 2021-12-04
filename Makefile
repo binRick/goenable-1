@@ -33,7 +33,7 @@ dist: out
 	go run ./cmd/rename_binaries.go ./out
 
 out:
-	mkdir out
+	mkdir out src tmp
 
 .PHONY: clean
 clean:
@@ -54,3 +54,5 @@ module: out
 	command jinja -D MODULE ${MODULE} ${TMP_DIR}/hooks.go -o ${SRC_DIR}/hooks.go
 	command jinja -D MODULE ${MODULE} ${TMP_DIR}/main.go -o ${SRC_DIR}/main.go
 	cd ${SRC_DIR} && env CGO_ENABLED=${CGO_ENABLED} go build -o ../out/${MODULE}.so -buildmode=c-shared .
+
+
