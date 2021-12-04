@@ -1,12 +1,14 @@
 GO111MODULE := on
 CGO_ENABLED := 1
+TMP_DIR := ./tmp
+SRC_DIR := ./src
+OUT_DIR := ./out
 export
 TARGETS := darwin/amd64,linux/amd64
 GO_VERSION := 1.17.2
 BASH_VERSION := 5.1.8
 SHELL := /usr/bin/env bash
 TEMPLATES_DIR := ./templates
-SRC_DIR := ./
 
 .PHONY: all
 all: module
@@ -35,14 +37,20 @@ out:
 
 .PHONY: clean
 clean:
-	rm -rf out
+	rm -rf out src tmp
 
 .PHONY: module
 module: out
+	[[ -d "${TMP_DIR}" ]] || mkdir -p "${TMP_DIR}"
 	[[ -d "${SRC_DIR}" ]] || mkdir -p "${SRC_DIR}"
-	rsync ${TEMPLATES_DIR}/*.j2 ${TMP_DIR}/.
-	replace '[[MODULE]]' '{{MODULE}}' -- ${TMP_DIR}/*.j2
-	command jinja -D MODULE ${MODULE} ${TMP_DIR}/bash_structs.go.j2 -o ${SRC_DIR}/bash_structs.go
-	command jinja -D MODULE ${MODULE} ${TMP_DIR}/bash.go.j2 -o ${SRC_DIR}/bash.go
-	command jinja -D MODULE ${MODULE} ${TMP_DIR}/hooks.go.j2 -o ${SRC_DIR}/hooks.go
-	env CGO_ENABLED=${CGO_ENABLED} go build -o out/${MODULE}.so -buildmode=c-shared ${SRC_DIR}/.
+	[[ -d "${OUT_DIR}" ]] || mkdir -p "${OUT_DIR}"
+	rsync -L ${TEMPLATES_DIR}/*.go ${TMP_DIR}/.
+	rsync -ar cutils ${SRC_DIR}/.
+	rsync go.mod  ${SRC_DIR}/.
+	rsync go.sum  ${SRC_DIR}/.
+	replace '__MODULE__' '{{MODULE}}' -- ${TMP_DIR}/*.go
+	command jinja -D MODULE ${MODULE} ${TMP_DIR}/bash_structs.go -o ${SRC_DIR}/bash_structs.go
+	command jinja -D MODULE ${MODULE} ${TMP_DIR}/bash.go -o ${SRC_DIR}/bash.go
+	command jinja -D MODULE ${MODULE} ${TMP_DIR}/hooks.go -o ${SRC_DIR}/hooks.go
+	command jinja -D MODULE ${MODULE} ${TMP_DIR}/main.go -o ${SRC_DIR}/main.go
+	cd ${SRC_DIR} && env CGO_ENABLED=${CGO_ENABLED} go build -o ../out/${MODULE}.so -buildmode=c-shared .

@@ -3,18 +3,18 @@ package main
 /*
 #cgo pkg-config: bash
 #include "builtins.h"
-extern int [[MODULE]]_builtin(WORD_LIST *list);
+extern int __MODULE___builtin(WORD_LIST *list);
 
 char *empty_doc[] = {
 	NULL
 };
 
-struct builtin [[MODULE]]_struct = {
-  "[[MODULE]]",       // builtin name
-  [[MODULE]]_builtin, // function implementing the builtin
+struct builtin __MODULE___struct = {
+  "__MODULE__",       // builtin name
+  __MODULE___builtin, // function implementing the builtin
   BUILTIN_ENABLED,  // initial flags for builtin
   empty_doc,        // array of long documentation strings.
-  "Run '[[MODULE]] help' for help.",  // usage synopsis; becomes short_doc. Note: This constant is replaced at load time on Bash 4.4+.
+  "Run '__MODULE__ help' for help.",  // usage synopsis; becomes short_doc. Note: This constant is replaced at load time on Bash 4.4+.
   0                 // reserved for internal use
 };
 */
