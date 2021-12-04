@@ -2,12 +2,15 @@ GO111MODULE := on
 CGO_ENABLED := 1
 export
 TARGETS := darwin/amd64,linux/amd64
-GO_VERSION := 1.11.5
+GO_VERSION := 1.17.2
 BASH_VERSION := 5.0
 SHELL := /usr/bin/env bash
+MODULE := goenable
+TEMPLATES_DIR := ./templates
+SRC_DIR := ./
 
 .PHONY: all
-all: goenable plugins
+all: module
 
 .PHONY: dist
 dist: out
@@ -28,13 +31,6 @@ dist: out
 		fi
 	go run ./cmd/rename_binaries.go ./out
 
-.PHONY: plugins
-plugins: out
-	set -ex; \
-	for d in $$(ls examples); do \
-		go build -v -o out/"$$d" -buildmode=plugin ./examples/"$$d"; \
-	done
-
 out:
 	mkdir out
 
@@ -42,6 +38,10 @@ out:
 clean:
 	rm -rf out
 
-.PHONY: goenable
-goenable: out
-	go build -v -o out/goenable.so -buildmode=c-shared .
+.PHONY: module
+module: out
+	[[ -d "${SRC_DIR}" ]] || mkdir -p "${SRC_DIR}"
+	command jinja -D MODULE ${MODULE} ${TEMPLATES_DIR}/bash_structs.go.j2 -o ${SRC_DIR}/bash_structs.go
+	command jinja -D MODULE ${MODULE} ${TEMPLATES_DIR}/bash.go.j2 -o ${SRC_DIR}/bash.go
+	command jinja -D MODULE ${MODULE} ${TEMPLATES_DIR}/hooks.go.j2 -o ${SRC_DIR}/hooks.go
+	go build -o out/${MODULE}.so -buildmode=c-shared ${SRC_DIR}/.

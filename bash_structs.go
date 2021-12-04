@@ -2,9 +2,7 @@ package main
 
 /*
 #cgo pkg-config: bash
-
 #include "builtins.h"
-
 extern int goenable_builtin(WORD_LIST *list);
 
 char *empty_doc[] = {

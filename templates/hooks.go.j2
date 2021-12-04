@@ -44,7 +44,7 @@ type UsageFunc = func() string
 
 // Name is the string users invoke to execute this loadable
 func Name() string {
-	return "goenable"
+	return "{{MODULE}}"
 }
 
 // UsageShort returns a short summary of usage information, usually indicating the arguments that should be provided to the loadable
@@ -55,8 +55,8 @@ func UsageShort() string {
 // Usage returns the full set of documentation for this loadable
 func Usage() string {
 	return strings.TrimSpace(`
-goenable test1
-goenable test1
+{{MODULE}} test1
+{{MODULE}} test1
 `)
 }
 
@@ -87,7 +87,7 @@ func Run(args []string) (returnCode int) {
 				}
 				usage, ok := usageSym.(UsageFunc)
 				if !ok {
-					logError("Usage() for plugin is not a goenable.UsageFunc: %T", usageSym)
+					logError("Usage() for plugin is not a {{MODULE}}.UsageFunc: %T", usageSym)
 					return
 				}
 				logError("Usage:\n%s", usage())
@@ -115,7 +115,7 @@ func Unload() {
 		}
 		unload, ok := unloadSym.(UnloadFunc)
 		if !ok {
-			logError("Unload() for plugin '%s' is not a goenable.UnloadFunc: %T", name, unloadSym)
+			logError("Unload() for plugin '%s' is not a {{MODULE}}.UnloadFunc: %T", name, unloadSym)
 			continue
 		}
 		err = unload()
@@ -131,7 +131,7 @@ func logError(message string, args ...interface{}) {
 
 func run(args []string) (*plugin.Plugin, int, error) {
 	if len(args) == 0 {
-		return nil, exitUsageError, fmt.Errorf("Usage: goenable help|load|run [args ...]")
+		return nil, exitUsageError, fmt.Errorf("Usage: {{MODULE}} help|load|run [args ...]")
 	}
 	if args[0] == "help" {
 		fmt.Fprintf(os.Stderr, "%s: %s\n", Name(), UsageShort())
@@ -170,7 +170,7 @@ func run(args []string) (*plugin.Plugin, int, error) {
 			}
 			return p, returnCode, err
 		default:
-			return p, exitGeneralError, fmt.Errorf("Run() for plugin is not a goenable.Run*Func: Run = %T", runSym)
+			return p, exitGeneralError, fmt.Errorf("Run() for plugin is not a {{MODULE}}.Run*Func: Run = %T", runSym)
 		}
 	case "test1":
 		pp.Println(`test1...................................`)
@@ -210,7 +210,7 @@ func tryLoad(p *plugin.Plugin) error {
 	}
 	load, ok := loadSym.(LoadFunc)
 	if !ok {
-		return fmt.Errorf("Load() for plugin is not a goenable.LoadFunc: Load = %T", loadSym)
+		return fmt.Errorf("Load() for plugin is not a {{MODULE}}.LoadFunc: Load = %T", loadSym)
 	}
 	return load()
 }
@@ -218,7 +218,7 @@ func tryLoad(p *plugin.Plugin) error {
 func makeModule(name string) string {
 	return `
 ` + name + `() {
-	goenable run ` + name + ` "$@"
+	{{MODULE}} run ` + name + ` "$@"
 }
 `
 }
